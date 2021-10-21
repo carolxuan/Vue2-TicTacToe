@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./all.css">
+  <title>TIC TAC TOE</title>
+</head>
+<body>
+  <div id="app">
+    <div class="select" v-if="first">
+      <h3>請先選擇選手</h3>
+      <div class="select-box">
+        <div class="section circle mr-3" @click="whoHandler('circle')"></div>
+        <div class="section cross" @click="whoHandler('cross')"></div>
+      </div>
+    </div>
+    <div class="board">
+      <div class="section" v-for="(num, index) in sections" 
+      :key="index"
+      :class="{ circle: num === 1, cross: num === 10 }"
+      @click="clickHandler(index)"
+      ></div>
+    </div>
+    <div class="name">
+      <span>目前玩家：</span>
+      <div class="player">
+        <div :class="{ circle: step % 2 === setting.odd[0], cross: step % 2 === setting.odd[1] }"></div>
+      </div>
+      <div class="reset" @click="resetHandler">reset</div>
+    </div>
+    <transition name="fade">
+      <div class="result" v-if="winner" @click="resetHandler">
+        <p>{{ winner }}</p>
+      </div>
+    </transition>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script type="module">
+    const app = new Vue({
+      el: '#app',
+      data() {
+        return {
+          step: 0, // O 偶數, X 奇數
+          sections: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          first: true,
+          setting: {
+            odd: [0, 1],
+            set: [1, 10]
+          }
+        }
+      },
+      computed: {
+        status() {
+          return [
+            this.sections[0] + this.sections[1] + this.sections[2],
+            this.sections[3] + this.sections[4] + this.sections[5],
+            this.sections[6] + this.sections[7] + this.sections[8],
+            this.sections[0] + this.sections[3] + this.sections[6],
+            this.sections[1] + this.sections[4] + this.sections[7],
+            this.sections[2] + this.sections[5] + this.sections[8],
+            this.sections[0] + this.sections[4] + this.sections[8],
+            this.sections[2] + this.sections[4] + this.sections[6],
+          ]
+        },
+        winner() {
+          let winner = null
+          if(this.step >= 4) {
+            winner = this.status.find((count) => {
+              return count === 3 || count === 30
+            }) || null
+            if(winner === 3) {
+              winner = '圈圈贏了！'
+            } else if (winner === 30) {
+              winner = '叉叉贏了！'
+            } else if (winner === null && this.step > 8) {
+              winner = '平手！沒輸沒贏拉！'
+            }
+          }
+          return winner
+        }
+      },
+      methods: {
+        whoHandler(who) {
+          if(who === 'circle') {
+            this.setting = {
+              odd: [0, 1],
+              set: [1, 10]
+            }
+          } else {
+            this.setting = {
+              odd: [1, 0],
+              set: [10, 1]
+            }
+          }
+          if (this.first) this.first = false
+        },
+        clickHandler(index) {
+          // sections 裡面的值等於零才執行
+          if(this.sections[index] === 0) {
+            this.$set(this.sections, index, this.step % 2 === 0 ? this.setting.set[0] : this.setting.set[1])
+            this.step++
+          }
+        },
+        resetHandler() {
+          this.sections = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+          this.step = 0
+          this.first = true
+        }
+      }
+    });
+  </script>
+</body>
+</html>
